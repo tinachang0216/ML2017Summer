@@ -1,0 +1,103 @@
+#Connect to the ssh agent
+ssh-add
+ssh -A hadoop@loginname
+
+#Install git
+sudo yum install -y git
+#Clone
+git clone git@github.com:my-repository-path/name.git
+ls
+cd summer2017-hw1-tinachang0216/
+ls -la
+
+＃Run a simulated MapReduce job on a small text file
+cat Meyers.txt | ./wordcount_mapper.py | sort | ./wordcount_reducer.py >> wordcount_results.txt
+
+＃List the files in your cluster's HDFS
+hadoop fs -ls
+＃List the files in the course S3 bucket s3://gwu-bigdata/
+hdfs dfs -ls s3://gwu-bigdata/
+hdfs dfs -ls s3://gwu-bigdata/data/quaz*.txt
+
+#Check
+df -h
+#Switch
+cd /mnt
+#download file
+hadoop fs -get s3://gwu-bigdata/data/quazyilx1.txt
+
+＃Creat dictionary in HDFS
+hadoop fs -mkdir /user/hadoop
+#load the file to dictionary
+hadoop fs -put Meyers.txt /user/hadoop3
+
+#Single file on disk
+(time grep "fnard:-1 fnok:-1 cark:-1 gnuck:-1" \
+quazyilx1.txt > p2_1_results.txt ) 2> p2_1_time.txt
+#Stream file from S3 to grep
+(time aws s3 cp s3://gwu-bigdata/data/quazyilx1.txt - | \
+grep "fnard:-1 fnok:-1 cark:-1 gnuck:-1" > p2_2_results.txt ) 2> p2_2_time.txt
+
+# Invoke the Hadoop Streaming Job
+hadoop jar /usr/lib/hadoop/hadoop-streaming.jar \
+-files wordcount_mapper.py,wordcount_reducer.py \
+-input /user/hadoop/Meyers.txt \
+-output myoutput \
+-mapper wordcount_mapper.py \
+-reducer wordcount_reducer.py
+#Extract the results from HDFS
+hdfs dfs -cat myoutput/part-*| sort > p2_3_results.txt
+
+hadoop jar /usr/lib/hadoop/hadoop-streaming.jar \
+-D mapreduce.job.reduces=0 \
+-D stream.non.zero.exit.is.failure=false \
+-input s3://gwu-bigdata/data/quazyilx2.txt \
+-output output1 \
+-mapper "/bin/grep \"fnard:-1 fnok:-1 cark:-1 gnuck:-1\""
+#Extract the results from HDFS
+hdfs dfs -cat output1/part-*| sort > p2_4_results.txt
+
+hadoop jar /usr/lib/hadoop/hadoop-streaming.jar \
+-D mapreduce.job.reduces=0 \
+-D stream.non.zero.exit.is.failure=false \
+-input s3://gwu-bigdata/data/quazyilx3.txt \
+-output output2 \
+-mapper "/bin/grep \"fnard:-1 fnok:-1 cark:-1 gnuck:-1\""
+#Extract the results from HDFS
+hdfs dfs -cat output2/part-*| sort > p2_5_results.txt
+
+＃List the file, not necessary
+hdfs dfs -ls s3://gwu-bigdata/data/forensicswiki.2012.txt
+hadoop fs -put forensicswiki.2012.txt /user/hadoop
+
+＃View the first 10 lines of the file
+aws s3 cp s3://gwu-bigdata/data/forensicswiki.2012.txt - | head -10
+
+#Run in cluster
+hadoop jar /usr/lib/hadoop/hadoop-streaming.jar \
+-files logfile_mapper.py,logfile_reducer.py \
+-input s3://gwu-bigdata/data/forensicswiki.2012.txt \
+-output output3 \
+-mapper logfile_mapper.py \
+-reducer logfile_reducer.py
+
+#Extract the results from HDFS
+hdfs dfs -cat output3/part-*| sort > logfile_results1.txt
+
+cat logfile_results1.txt | ./logfile_mapper.py | sort | ./logfile_reducer.py >> logfile_results.txt
+
+hadoop fs -put logfile_results.txt /user/hadoop
+
+
+#Split
+#Regular expression for data
+#Extract data
+#Datetime
+
+＃push
+git add wordcount_results.txt
+git status
+git commit -m "commit"
+git push --set-upstream git@github.com:gwu-bigdata/summer2017-hw1-tinachang0216.git master
+git pull git@github.com:gwu-bigdata/summer2017-hw1-tinachang0216.git
+git push git@github.com:gwu-bigdata/summer2017-hw1-tinachang0216.git
