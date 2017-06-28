@@ -1,0 +1,14 @@
+#To directionay
+cd
+#Back
+cd ..
+#Crear
+mkdir
+#Copy
+cp
+#Enable writing, -rwxr-xr-x@
+chmod +x logfile_mapper.py
+#Run mapper.py
+cat Meyers.txt | ./logfile_mapper.py
+#Run reducer.py
+cat Meyers.txt | ./logfile_python.py
